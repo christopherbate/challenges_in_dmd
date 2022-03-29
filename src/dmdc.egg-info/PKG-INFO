@@ -1,0 +1,69 @@
+Metadata-Version: 2.1
+Name: dmdc
+Version: 1.0.0
+Summary: A sample Python project
+License: UNKNOWN
+Keywords: sample,setuptools,development
+Platform: UNKNOWN
+Requires-Python: >=3.6, <4
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+The code in this folder reproduces the key figures from "Challenges in Dynamic Mode Decomposition" by Z. Wu, S. L. Brunton, and S. Revzen.
+
+# Running the project
+Run everything. It takes around 12min to run on intel core i7 vPro 8th Gen. 
+./runAll.sh
+
+A single eigenvalue density plot.
+python3 plot_test.py
+
+Eigenvalue density contour plots (figure 2,4,6).
+python3 plot_eigDensity.py
+
+Eigenvalue stats plot (figure 3, 5, 7, 8)
+python3 plot_stats.py
+
+Eigenvalue density contour plot in appendix (figure 9-14)
+python3 plot_appendix.py
+
+# Dependency
+python >=3.6.9
+numpy >=1.19.5
+scipy >=1.5.4
+matplotlib >=3.3.4
+
+Some of the plotting code in plot_util.py goes back to 2008, and was developed
+as part of Revzen's thesis. This older code was released under the GPL 3.0
+licence.
+
+variableProj.py and optimalDMD.py are from py-optDMD (https://github.com/kunert/py-optDMD) and governed by copyright and license of that work.
+
+Work on this code was primarily funded by ARO MURI W911NF-17-1-0306 
+"From Data-Driven Operator Theoretic Schemes to Prediction, Inference, 
+and Control of Systems", and government usage rights are reserved as per that
+funding agreement.
+
+All other usage is governed by the GPL 3.0 license as specified below.
+
+This code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+# Bugfix for upstream issues
+
+variableProj.py and optimalDMD.py are from py-optDMD (https://github.com/kunert/py-optDMD)
+We have addressed the issue https://github.com/kunert/py-optDMD/issues/1#issue-777534962.
+We have changed the code syntax to compile in python3 environment.
+The result now matches the MATLAB version of optDMD within numerical accuracy for our examples.
+The changes made from upper steam repo kunert/py-optDMD are in opt-dmd-diff
+
+
