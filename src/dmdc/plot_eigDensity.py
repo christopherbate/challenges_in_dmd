@@ -106,8 +106,7 @@ def plot_cond(N, figName):
         A = system_matrix_A(lams, theta, phi, s)
         Traj, DEv_true = genTraj(
             A, N, dt, lams, repeat=repeat, mag=mag, Ntraj=max(Ntrajl), L=100, sums=[]
-        )
-        print(Traj.X[0].shape, Traj.L)
+        )        
         Trajl.append(Traj)
         Ac.append(cond(A))
         print("Generating trajectories: %i/5" % (i + 1), end="\r")

@@ -35,7 +35,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from dmdc.generator import trajectory
-from dmdc import dmd
+from dmdc.dmd import dmd
 from numpy import (
     zeros, ones, asarray, histogram, histogram2d, log, exp, shape, nansum,
     convolve, linspace, concatenate, pi, count_nonzero, where, argsort, seterr
@@ -166,15 +166,13 @@ class VisEig:
         ax.set(xticks=v,xticklabels=l,yticks=v,yticklabels=l)
 
 
-def genTraj(A, N, dt, lams, Ntraj=50, L=50, repeat=200, mag=0.05, magsys=None, sums=[]):
-    print(f"genTraj L={L}")
+def genTraj(A, N, dt, lams, Ntraj=50, L=50, repeat=200, mag=0.05, magsys=None, sums=[]):    
     D = len(lams)
     if magsys == None:
         magsys=mag
     Traj = trajectory(A, N, dt, lams, \
                 repeat=repeat, sys_noise=magsys, obs_noise=mag, sums=sums)
-    x0 = uniform(-1,1,(Ntraj,D))
-    # print("x0 shape", x0.shape)
+    x0 = uniform(-1,1,(Ntraj,D))    
     for x0i,j in zip(x0,range(Ntraj)):
         x0i/=norm(x0i)
         Traj.add_trajectory(L, x0i)
@@ -185,19 +183,14 @@ def doDMD(Traj, Ntraj, L, method='exact'):
     DEv_l  = []
     b_l = []
     DModes_l = []
-    for i in range(Traj.repeat):
-        print(f"Traj.Y={len(Traj.Y)} Traj.Y[0]={Traj.Y[0].shape}")
+    for i in range(Traj.repeat):        
         Y0 = [yi[:L-1,:,i].T for yi in Traj.Y[:Ntraj]]
-        Y1 = [yi[1:L,:,i].T for yi in Traj.Y[:Ntraj]]
-        print(f"Y0={Y0[0].shape}")
+        Y1 = [yi[1:L,:,i].T for yi in Traj.Y[:Ntraj]]        
         Y0 = concatenate(Y0, axis=-1)
-        Y1 = concatenate(Y1, axis=-1)
-        print(f"Y0={Y0.shape}")
+        Y1 = concatenate(Y1, axis=-1)        
         DModes, DEv = dmd(Y0, Y1, -len(Traj.sums), method=method)
-        print(DModes, DEv)
         b = pinv(DModes).dot(Traj.Y[0][0,:,i])
-        inUse, DEv, b  = eigValSort(DEv, b, Traj.DEv_true)
-        print(inUse, DEv, b)
+        inUse, DEv, b  = eigValSort(DEv, b, Traj.DEv_true)        
         if inUse:
             DEv_l.append(DEv)
             b_l.append(b)

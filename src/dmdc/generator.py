@@ -69,8 +69,7 @@ class trajectory:
             for n in range(N):
                 for ss in findPairs(lst, n + 1, D):
                     if ss not in sums and sum(ss) != 0:
-                        sums.append(ss)
-        print("sums:")                        
+                        sums.append(ss)        
         self.sums = sums  # order N, dim D
         self.L = []
         self.X = []  # state list: NUM trajectroies x L x D x repeat
@@ -105,8 +104,7 @@ class trajectory:
         OUTPUT:
             trajectory in LxN array
         """
-        # x0 random initialization
-        # print("add trajectory: repeat ", self.repeat)
+        # x0 random initialization        
         xt = []
         xt.extend(list(x0) for i in range(self.repeat))
         xt = asarray(xt).T
@@ -130,16 +128,14 @@ class trajectory:
 
     def observ(self, x, noise=0):
         y = []
-        y.append(self.extend(x, noise))
-        print("objs", y[-1].shape)
+        y.append(self.extend(x, noise))        
         return concatenate(y)
 
     def extend(self, x, noise):
         y = []
         for s in self.sums:
             yy = 1            
-            for xx, ss in zip(x, s):
-                print("xx", xx.shape)
+            for xx, ss in zip(x, s):                
                 yy *= xx**ss
             y.append(yy)
         y = array(y)
