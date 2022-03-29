@@ -2,13 +2,10 @@ from setuptools import setup, find_packages
 import pathlib
 
 here = pathlib.Path(__file__).parent.resolve()
-long_description = (here / 'README.txt').read_text(encoding='utf-8')
 
 setup(
     name='dmdc',  # Required
-    version='1.0.0',  # Required
-    description='A sample Python project',  # Optional
-    long_description=long_description,  # Optional
+    version='1.0.0',  # Required        
     long_description_content_type='text/markdown',  # Optional (see note above)
     keywords='sample, setuptools, development',  # Optional    
     package_dir={'': 'src'},  # Optional    
