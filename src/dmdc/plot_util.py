@@ -34,7 +34,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from generator import trajectory
+from dmdc.generator import trajectory
 from dmdc import dmd
 from numpy import (
     zeros, ones, asarray, histogram, histogram2d, log, exp, shape, nansum,
@@ -44,7 +44,7 @@ from numpy.linalg import norm, pinv
 from numpy.random import uniform
 from scipy.signal import windows
 from matplotlib.pyplot import gca, gcf, plot, imshow
-from optimalDMD import optdmd
+from dmdc.optimalDMD import optdmd
 
 class VisEig:
     """VisEig is a tool for visualizing distributions of complex numbers
