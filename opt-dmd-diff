@@ -1,0 +1,136 @@
+diff --git a/variableProj.py b/variableProj.py
+index 6a9fe4f..caffb14 100644
+--- a/variableProj.py
++++ b/variableProj.py
+@@ -6,7 +6,8 @@ Created on Wed Apr 05 16:05:26 2017
+ """
+ import numpy as np
+ import scipy as sci
+-from scipy.sparse import csc_matrix
++from scipy import linalg as slin
++from scipy.sparse import lil_matrix
+ import copy
+ import sys,pdb
+ import matplotlib.pyplot as plt
+@@ -18,7 +19,7 @@ def backslash(A,B):
+     x=[]
+     for k in range(B.shape[1]):
+         b=B[:,k][:,None]
+-        x.append(np.linalg.lstsq(A,b)[0])
++        x.append(np.linalg.lstsq(A,b, rcond=-1)[0])
+     return np.hstack(x)
+
+ def varpro2expfun(alphaf,tf):
+@@ -33,7 +34,7 @@ def varpro2dexpfun(alphaf,tf,i):
+     n=alpha.size
+     if (i<0)|(i>=n):
+         raise Exception('varpro2dexpfun: i outside of index range for alpha')
+-    A=csc_matrix((m,n),dtype=complex)
++    A=lil_matrix((m,n),dtype=complex)
+     ttemp=np.reshape(t,(m,1))
+     A[:,i]=ttemp*np.exp(alpha[i]*ttemp)
+     return A
+@@ -58,11 +59,11 @@ def varpro2_solve_special(R,D,b):
+
+ def checkinputrange(xname,xval,xmin,xmax):
+     if xval>xmax:
+-        print 'Option {:} with value {:} is greater than {:}, which is not recommended'.format(xname,xval,xmin,xmax)
++        print('Option {:} with value {:} is greater than {:}, which is not recommended'.format(xname,xval,xmin,xmax))
+     if xval<xmin:
+-        print 'Option {:} with value {:} is less than {:}, which is not recommended'.format(xname,xval,xmin,xmax)
++        print('Option {:} with value {:} is less than {:}, which is not recommended'.format(xname,xval,xmin,xmax))
+ class varpro_opts(object):
+-    def __init__(self,lambda0=1.0,maxlam=52,lamup=2.0,lamdown=2.0,ifmarq=1,maxiter=30,tol=1.0e-6,eps_stall=1.0e-12,iffulljac=1):
++    def __init__(self,lambda0=1.0,maxlam=52,lamup=2.0,lamdown=2.0,ifmarq=1,maxiter=500,tol=1.0e-6,eps_stall=1.0e-12,iffulljac=1):
+         checkinputrange('lambda0',lambda0,0.0,1.0e16)
+         checkinputrange('maxlam',maxlam,0,200)
+         checkinputrange('lamup',lamup,1.0,1.0e16)
+@@ -109,7 +110,7 @@ def varpro2(y,t,phi=[],dphi=[],m=[],n=[],iss=[],ia=[],alpha_init=[],opts=[]):
+     irank=np.sum(sd>(tolrank*sd[0]))
+     U=U[:,:irank]
+     S=S[:irank,:irank]
+-    V=V[:,:irank].T
++    V=V[:,:irank].T.conj()
+
+     b=backslash(phimat,y)
+
+@@ -124,7 +125,7 @@ def varpro2(y,t,phi=[],dphi=[],m=[],n=[],iss=[],ia=[],alpha_init=[],opts=[]):
+         #build jacobian matrix, looping over alpha indices
+         for j in range(ia):
+             dphitemp=dphi(alpha,t,j).astype(complex)
+-            djaca=(dphitemp-csc_matrix(U*csc_matrix(U.T.conj()*dphitemp))).dot(b)
++            djaca=(dphitemp-lil_matrix(U*lil_matrix(U.T.conj()*dphitemp))).dot(b)
+             if iffulljac==1:
+                 #use full expression for jacobian
+                 djacb=U.dot(backslash(S,V.T.conj().dot(dphitemp.T.conj().dot(res))))
+@@ -140,17 +141,16 @@ def varpro2(y,t,phi=[],dphi=[],m=[],n=[],iss=[],ia=[],alpha_init=[],opts=[]):
+         #pre-compute components which don't depend on step-size (lambda)
+         #get pivots and lapack-style qr for jacobian matrix
+
+-        _,_,_,work,_=sci.linalg.lapack.zgeqp3(djacmat)
+-        djacout,jpvt,tau,_,_=sci.linalg.lapack.zgeqp3(djacmat,work)
++        qout,djacout,jpvt = slin.qr(djacmat, mode='economic', pivoting=True)
+         rjac=np.triu(djacout)
+-        lwork=sci.linalg.lapack.zunmqr('L','C',djacout,tau,res.ravel(order='F')[:,None],-1)[1]
+-        rhstop=sci.linalg.lapack.zunmqr('L','C',djacout,tau,res.ravel(order='F')[:,None],lwork)[0]
++        rhstemp = res.ravel(order='F')[:,None]
++        rhstop = qout.T.conj().dot(rhstemp)
+
+-        scalespvt=scales[jpvt-1]
++        scalespvt=scales[jpvt[:ia]]
+         rhs=np.concatenate((rhstop,np.zeros((ia,1)).astype(complex)),0)
+
+         delta0=varpro2_solve_special(rjac,lambda0*np.diag(scalespvt),rhs)
+-        delta0=delta0[jpvt-1]
++        delta0[jpvt[:ia]]=delta0[range(ia)]
+
+         alpha0=alpha.ravel()-delta0.ravel()
+
+@@ -165,7 +165,7 @@ def varpro2(y,t,phi=[],dphi=[],m=[],n=[],iss=[],ia=[],alpha_init=[],opts=[]):
+             #see if smaller lambda is better
+             lambda1=lambda0/lamdown
+             delta1=varpro2_solve_special(rjac,lambda1*np.diag(scalespvt),rhs)
+-            delta1=delta1[jpvt-1]
++            delta1[jpvt[:ia]] = delta1[range(ia)]
+
+             alpha1=alpha.ravel()-delta1.ravel()
+             phimat=phi(alpha1,t)
+@@ -191,7 +191,7 @@ def varpro2(y,t,phi=[],dphi=[],m=[],n=[],iss=[],ia=[],alpha_init=[],opts=[]):
+             for j in range(maxlam):
+                 lambda0=lambda0*lamup
+                 delta0=varpro2_solve_special(rjac,lambda0*np.diag(scalespvt),rhs)
+-                delta0=delta0[jpvt-1]
++                delta0[jpvt[:ia]]=delta0[range(ia)]
+
+                 alpha0=alpha.ravel()-delta0.ravel()
+                 phimat=phi(alpha0,t)
+@@ -213,7 +213,7 @@ def varpro2(y,t,phi=[],dphi=[],m=[],n=[],iss=[],ia=[],alpha_init=[],opts=[]):
+                 niter=itern
+                 err[itern]=errlast
+                 imode=4
+-                print 'Failed to find appropriate step length at iteration {:}\n Current residual {:}'.format(itern,errlast)
++                print('Failed to find appropriate step length at iteration {:}\n Current residual {:}'.format(itern,errlast))
+                 return b,alpha,niter,err,imode,alphas
+
+         alphas[:,itern]=alpha
+@@ -226,7 +226,7 @@ def varpro2(y,t,phi=[],dphi=[],m=[],n=[],iss=[],ia=[],alpha_init=[],opts=[]):
+         if itern>0:
+             niter=itern
+             imode=8
+-            print 'stall detected: residual reduced by less than {:} \n times residual at previous step. \n iteration {:} \n current residual {:}'.format(eps_stall,itern,errlast)
++            #print('stall detected: residual reduced by less than {:} \n times residual at previous step. \n iteration {:} \n current residual {:}'.format(eps_stall,itern,errlast))
+             return b,alpha,niter,err,imode,alphas
+         phimat=phi(alpha,t)
+         [U,S,V]=np.linalg.svd(phimat,full_matrices=False)
+@@ -235,12 +235,12 @@ def varpro2(y,t,phi=[],dphi=[],m=[],n=[],iss=[],ia=[],alpha_init=[],opts=[]):
+         irank=np.sum(sd>(tolrank*sd[0]))
+         U=U[:,:irank]
+         S=S[:irank,:irank]
+-        V=V[:,:irank].T
++        V=V[:,:irank].T.conj()
+
+     #only get here if failed to meet tolerance in maxiter steps
+     niter=maxiter
+     imode=1
+-    print 'failed to reach tolerance after maxiter={:} iterations \n current residual {:}'.format(maxiter,errlast)
++    print('failed to reach tolerance after maxiter={:} iterations \n current residual {:}'.format(maxiter,errlast))
