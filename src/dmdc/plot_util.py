@@ -35,7 +35,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from generator import trajectory
-from dmd import dmd
+from dmdc import dmd
 from numpy import (
     zeros, ones, asarray, histogram, histogram2d, log, exp, shape, nansum,
     convolve, linspace, concatenate, pi, count_nonzero, where, argsort, seterr

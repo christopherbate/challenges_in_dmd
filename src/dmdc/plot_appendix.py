@@ -31,8 +31,8 @@ from matplotlib.pyplot import (
   axes, subplots,subplots_adjust, xticks, yticks, text, savefig
   )
 #from plot_util import *
-from plot_eigDensity import system_matrix_A
-from plot_util import genTraj, doDMD, visSortedEig, dooptDMD
+from dmdc.plot_eigDensity import system_matrix_A
+from dmdc.plot_util import genTraj, doDMD, visSortedEig, dooptDMD
 from sys import stdout
 
 

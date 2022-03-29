@@ -49,8 +49,8 @@ from matplotlib.pyplot import (
     text,
     savefig,
 )
-from dmd import MUL
-from plot_util import genTraj, doDMD, visSortedEig
+from dmdc.dmd import MUL
+from dmdc.plot_util import genTraj, doDMD, visSortedEig
 from sys import stdout
 
 # Constant parameters
