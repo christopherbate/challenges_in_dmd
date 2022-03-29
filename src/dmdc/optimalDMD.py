@@ -12,7 +12,7 @@ Modified by Ziyou Wu and Shai Revzen, 2021, as per the following note:
 """
 
 import numpy as np
-from variableProj import varpro_opts, varpro2expfun, varpro2, varpro2dexpfun
+from dmdc.variableProj import varpro_opts, varpro2expfun, varpro2, varpro2dexpfun
 
 ############ NOW BEGIN PRELIMINARY OPTDMD CODE ##################    
 def optdmd(X,t,r,imode):
